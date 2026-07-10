@@ -1,0 +1,10 @@
+from enum import Enum
+
+MAX_CAMPOS_MULTISELECT = 10
+class FUNCIONALIDAD(Enum):
+    CONSULTAR_AVERIA = 1
+    NUEVA_AVERIA = 2
+    MODIFICAR_AVERIA = 3
+class FUNCION_AVERIAS(Enum):
+    VISUALIZAR = 1
+    EDITAR = 2

@@ -1,0 +1,47 @@
+{% extends "../main/base.html" %}
+
+{% block title %}Inicio{% endblock %}
+{% block h1 %}Inicio{% endblock %}
+
+{% block content %}
+{% if form.errors %}
+  <strong><p class="texto_error text-center">Usuario o contraseña incorrecta</p></strong>
+{% endif %}
+{% if user.is_authenticated %}
+  <h3 class="text-center mt-5">
+    Sesión iniciada como <strong> {{ user.get_full_name  }} </strong>
+  </h3>
+{% else %}
+
+    <form action="{{ app_path }}" method="post" id="login-form_1" class="form-floating border" action="{% url 'login' %}">
+      {% csrf_token %}
+      <div class="row">
+        <div class="col-sm-4"></div>
+        <div class="form-floating mb-3 col-sm-3">
+            <input type="text" name="username" autofocus="" autocapitalize="none" autocomplete="username" required="" class="form-control" placeholder="Usuario" id="id_username" maxlength="15"id="id_username">
+            <label for="id_username">Usuario</label>
+        </div>
+        <div class="col-sm-4"></div>
+      </div>
+      <div= class="row">
+        <div class="col-sm-4"></div>
+        <div class="form-floating mb-4 col-sm-3">
+          <input type="password" class="form-control" placeholder="Contraseña" name="password" autocomplete="current-password" required="" id="id_password" maxlength="15">
+          <label for="id_password">Contraseña</label>
+        </div>
+        <div class="col-sm-4"></div>
+      </div>
+      <div class="row">
+        <div class="col-sm-4"></div>
+        <div class="col-sm-3 text-center">
+          <input type="submit" value="Iniciar sesión" class="btn btn-secondary mb-2">
+          <br>
+          <a href="{% url 'password_reset' %}">Restablecer contraseña</a>
+        </div>
+        <div class="col-sm-4"></div>
+      </div>
+
+      <input type="hidden" name="next" value="{{ next }}">
+    </form>
+  {% endif %}
+{% endblock %}

@@ -1,0 +1,22 @@
+{% extends "./base.html" %}
+
+{% block content %}
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="row justify-content-center">
+            <div class="col"></div>
+            <p class="col-10 col-sm-7 col-md-3 col-lg-2 form-floating">
+                {{ form.tipo }}
+                <label for="{{ form.tipo.id_for_label }}">
+                    Tipo de equipo
+                </label>
+            </p>
+            <div class="col"></div>
+        </div>
+        <div class="row justify-content-center mt-1">
+            <div class="col"></div>
+            <button type="submit" class="btn btn-secondary col-9 col-sm-6 col-md-2 col-lg-1">Siguiente</button>
+            <div class="col"></div>            
+        </div>
+        </form>
+{% endblock %}

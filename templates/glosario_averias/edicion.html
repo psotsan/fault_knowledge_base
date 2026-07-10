@@ -1,0 +1,52 @@
+{% extends "../main/base.html" %}
+
+{% block title %}Nueva avería{% endblock %}
+{% block h1 %}Nueva avería{% endblock %}
+
+{% block content %}
+    {% if messages %}
+    {% for mensaje in messages %}
+        <div class="mensaje">
+            <h4> {{ mensaje }}</h4>
+        </div>
+    {% endfor %}
+    {% endif %}
+    <form method="post">
+        {% csrf_token %}
+        <div class="row justify-content-center mt-2 mb-2">
+            <div class="form-floating col-lg-1">
+                {{ form.modelo }}
+                <label for="{{ form.modelo.id_for_label }}">
+                    Modelo
+                </label>
+            </div>
+            <div class="form-floating col-lg-2">
+                {{ form.averia }}
+                <label for="{{ form.averia.id_for_label }}">
+                    Avería
+                </label>
+            </div>
+            <div class="form-floating col-lg-2">
+                {{ form.sintoma }}
+                <label for="{{ form.sintoma.id_for_label }}">
+                    Síntomas
+                </label>
+            </div>
+            <div class="form-floating col-lg-2">
+                {{ form.solucion }}
+                <label for="{{ form.averia.id_for_label }}">
+                    Solución
+                </label>
+            </div>
+            <div class="form-floating col-lg-2">
+                {{ form.ref }}
+                <label for="{{ form.averia.id_for_label }}">
+                    Referencias
+                </label>
+            </div>
+        </div>
+        <div class="row justify-content-center mt-3 mb-3">
+            <button name="guardar" type="submit" class="btn btn-secondary col-9 col-sm-6 col-md-2 col-lg-1">Guardar</button>
+        </div>
+    </form>
+{% endblock %}

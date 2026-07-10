@@ -1,0 +1,11 @@
+{% extends "../main/base.html" %}
+
+{% block title %}Inicio{% endblock %}
+{% block h1 %}Inicio{% endblock %}
+
+{% block content %}
+  <h3 class="text-center mt-5">
+    Sesión cerrada </strong>
+  </h3>
+  <h5 class="text-center mt-3"><a href="{% url 'login'%}">Click aquí para volver a iniciar sesión</a></h5>
+{% endblock %}

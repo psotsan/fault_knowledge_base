@@ -1,0 +1,91 @@
+{% extends "../main/base.html" %}
+
+{% block title %}Consultar avería{% endblock %}
+{% block h1 %}Consultar avería{% endblock %}
+
+{% block content %}
+<button class="btn btn-warning ms-2" type="button" data-bs-toggle="collapse" data-bs-target="#collapseExample" aria-expanded="false" aria-controls="collapseExample">
+    Mostrar/Ocultar filtros
+</button>
+<div class="container-fluid">
+    <form class="collapse" id="collapseExample" method="post">
+        {% csrf_token %}
+        <div class="row justify-content-center mt-2 mb-2">
+            <div class="form-floating col-lg-3">
+                <input type="text" name="busqueda" class="form-control" id="id_busqueda" placeholder="Buscar en avería, síntoma o solución...">
+                <label for="id_busqueda">Búsqueda rápida</label>
+            </div>
+        </div>
+        <div class="row justify-content-center mt-2 mb-2">
+            <div class="form-floating col-lg-1">
+                {{ form.modelo }}
+                <label for="{{ form.modelo.id_for_label }}">
+                    Modelo
+                </label>
+            </div>
+            <div class="form-floating col-lg-2">
+                {{ form.averia }}
+                <label for="{{ form.averia.id_for_label }}">
+                    Avería
+                </label>
+            </div>
+            <div class="form-floating col-lg-2">
+                {{ form.sintoma }}
+                <label for="{{ form.sintoma.id_for_label }}">
+                    Síntoma
+                </label>
+            </div>
+            <div class="form-floating col-lg-2">
+                {{ form.solucion }}
+                <label for="{{ form.solucion.id_for_label }}">
+                    Solución
+                </label>
+            </div>
+        </div>
+        <div class="row justify-content-center mt-3 mb-3">
+            <button type="submit" name="filtrar" class="btn btn-secondary col-9 col-sm-6 col-md-2 col-lg-1">Filtrar</button>
+        </div>
+    </form>
+</div>
+
+{% if messages %}
+    {% for mensaje in messages %}
+        <div class="mensaje mt-2">
+            <h4> {{ mensaje }}</h4>
+        </div>
+    {% endfor %}
+{% endif %}
+
+<table class="table table-striped caption-top mx-sm-3">
+    <caption>Listado de averías</caption>
+    <thead>
+        <tr>
+            <th style="width: 8%" scope="col">Modelo</th>
+            <th style="width: 24%" scope="col">Avería</th>
+            <th style="width: 24%" scope="col">Síntoma</th>
+            <th style="width: 24%" scope="col">Solución</th>
+            <th style="width: 14%" scope="col">Detalle</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for av in averias %}
+            <tr>
+                <td>{{ av.modelo }}</td>
+                <td>{{ av.averia }}</td>
+                <td>{{ av.sintoma }}</td>
+                <td>{{ av.solucion }}</td>
+                <td>
+                    {% if visualizar %}
+                        <a href="{% url 'detalle-averia' tipo_equipo=tipo_equipo pk=av.pk %}" class="btn btn-secondary">Ver detalle</a>
+                    {% else %}
+                        <form method="post" action="{% url 'editar-averia' tipo_equipo=tipo_equipo pk=av.pk %}">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-secondary">Editar</button>
+                        </form>
+                    {% endif %}
+                </td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>    
+{% endblock %}

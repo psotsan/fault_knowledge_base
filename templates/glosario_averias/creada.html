@@ -1,0 +1,51 @@
+{% extends "./base.html" %}
+
+{% block texto %}
+    {% for o in objs %}
+        <div class="border border-5 border-success rounded my-5">
+            <div class="row text-center">
+                <div class="col">
+                    <h3>Modelos</h3>
+                    <p>
+                        {% for m in o %}
+                            {{ m.modelo }}&nbsp;&nbsp;&nbsp;
+                        {% endfor %}
+                    </p>
+                </div>
+                <div class="col">
+                    <h3>Referencias</h3>
+                    <p>
+                        {{ o.0.ref }}
+                    </p>
+                </div>
+                <div class="col">
+                    <h3>ID</h3>
+                    <p>
+                        {{ o.0.id }}
+                    </p>
+                </div>
+            </div>
+
+            <hr>
+            <div class="row text-center">
+                <div class="col">
+                    <h3>Avería</h3>
+                    <p>
+                        {{ o.0.averia }}
+                    </p>
+                </div>
+                <div class="col">
+                    <h3>Síntomas</h3>
+                    <p>
+                        {{ o.0.sintoma }}
+                    </p>
+                </div>
+                <div class="col">
+                    <h3>Solución</h3>
+                    {{ o.0.solucion }}
+                </div>
+            </div>
+        </div>
+
+    {% endfor %}
+{% endblock texto %}

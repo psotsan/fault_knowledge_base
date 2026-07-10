@@ -1,0 +1,9 @@
+{% extends "./base.html" %}
+
+{% block title %} Acceso denegado {% endblock %}
+{% block h1 %} Acceso denegado {% endblock %}
+
+{% block content %}
+<h3 class="text-center mt-5"><strong>{{ user.get_full_name }}</strong> no dispone de acceso a esta sección</h3>
+{% endblock %}
+{% block inner_content %}{% endblock %}

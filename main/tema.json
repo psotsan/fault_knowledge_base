@@ -1,0 +1,30 @@
+{
+  "colores": {
+    "primario": {
+      "base": "rgb(229, 231, 235)",
+      "hover": "rgb(220, 220, 222)",
+      "texto": "black"
+    },
+    "secundario": {
+      "base": "rgb(0, 164, 153)",
+      "hover": "rgb(3, 139, 130)",
+      "texto": "white"
+    },
+    "peligro": {
+      "base": "#e71e1e",
+      "hover": "#eb3b3b",
+      "texto": "white"
+    },
+    "titulo": {
+      "fondo": "rgb(0, 164, 153)",
+      "texto": "white"
+    },
+    "mensaje": {
+      "texto": "rgb(77, 138, 135)",
+      "fondo": "rgb(255, 246, 236)"
+    },
+    "cuerpo": {
+      "fondo": "rgb(124, 0, 0)"
+    }
+  }
+}

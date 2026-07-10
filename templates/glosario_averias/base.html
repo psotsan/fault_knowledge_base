@@ -1,0 +1,13 @@
+{% extends "../main/base.html" %}
+
+{% block title %} Registrar avería {% endblock %}
+{% block h1 %} {{titulo}} {% endblock %}
+
+{% block content %}
+    <h4 id="id_mensaje" class="mt-5 text-center mensaje">{{ mensaje }}</h4>
+
+    {% block form %} {% endblock form %}
+    {% block texto %} {% endblock texto %}
+{% endblock content %}
+
+{% block innercontent %}{% endblock %}

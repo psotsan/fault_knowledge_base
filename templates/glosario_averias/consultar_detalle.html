@@ -1,0 +1,37 @@
+{% extends "../main/base.html" %}
+
+{% block title %}Consultar avería{% endblock %}
+{% block h1 %}Consultar avería{% endblock %}
+
+{% block content %}
+    <div class="row justify-content-center">
+        <div class="col-md-5">
+            <table class="table table-striped caption-top mx-sm-5">
+                <caption>Detalle de avería</caption>
+                <tr>
+                    <td style="width: 25%">Modelo</td>
+                    <td style="width: 75%">{{ object.modelo }}</td>
+                </tr>
+                <tr>
+                    <td>Avería</td>
+                    <td>{{ object.averia }}</td>
+                </tr>
+                <tr>
+                    <td>Síntomas</td>
+                    <td>{{ object.sintoma }}</td>
+                </tr>
+                <tr>
+                    <td>Solución</td>
+                    <td>{{ object.solucion }}</td>
+                </tr>
+                <tr>
+                    <td>Referencias</td>
+                    <td>{{ object.ref }}</td>
+                </tr>
+                </table>
+            <div class="d-flex justify-content-center">
+                <button class="btn btn-secondary mt-3 w-50 w-md-25" onclick="history.back()">Volver</button>
+            </div>
+        </div>        
+    </div>
+{% endblock %}

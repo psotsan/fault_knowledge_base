@@ -76,12 +76,16 @@ prompt_optional() {
 prompt_password() {
   local var="$1"
   local val
-  while true; do
-    read -r -s -p "  ${var}: " val
-    echo ""
-    [ -n "$val" ] && break
-    echo "  [WARN] cannot be empty"
-  done
+  read -r -s -p "  ${var}: " val
+  echo ""
+  printf "%s" "$val"
+}
+
+prompt_password_optional() {
+  local var="$1"
+  local val
+  read -r -s -p "  ${var}: " val
+  echo ""
   printf "%s" "$val"
 }
 
@@ -98,7 +102,7 @@ write_env() {
   local secret_key
   secret_key=$(generate_secret_key)
   env_content="${env_content}SECRET_KEY="
-  env_content="${env_content}$(printf '%s\n' "${secret_key}")"$'\n'
+  env_content="${env_content}$(printf '%s' "${secret_key}")"$'\n'
 
   local allowed_hosts
   allowed_hosts=$(prompt_required "ALLOWED_HOSTS")
@@ -124,9 +128,13 @@ write_env() {
   env_content="${env_content}DB_USER=${db_user}"$'\n'
 
   local db_password
-  db_password=$(prompt_password "DB_PASSWORD")
+  while true; do
+    db_password=$(prompt_password "DB_PASSWORD")
+    [ -n "$db_password" ] && break
+    echo "  [WARN] cannot be empty"
+  done
   env_content="${env_content}DB_PASSWORD="
-  env_content="${env_content}$(printf '%s\n' "${db_password}")"$'\n'
+  env_content="${env_content}$(printf '%s' "${db_password}")"$'\n'
 
   local db_host
   db_host=$(prompt_optional "DB_HOST" "localhost")
@@ -137,10 +145,10 @@ write_env() {
   env_content="${env_content}DB_PORT=${db_port}"$'\n'
 
   local db_root_password
-  db_root_password=$(prompt_password "DB_ROOT_PASSWORD (dejar vacío para usar DB_PASSWORD)")
+  db_root_password=$(prompt_password_optional "DB_ROOT_PASSWORD (dejar vacío para usar DB_PASSWORD)")
   if [ -n "$db_root_password" ]; then
     env_content="${env_content}DB_ROOT_PASSWORD="
-    env_content="${env_content}$(printf '%s\n' "${db_root_password}")"$'\n'
+    env_content="${env_content}$(printf '%s' "${db_root_password}")"$'\n'
   fi
 
   echo ""
@@ -162,9 +170,13 @@ write_env() {
       env_content="${env_content}AWS_ACCESS_KEY_ID=${aws_key}"$'\n'
 
       local aws_secret
-      aws_secret=$(prompt_password "AWS_SECRET_ACCESS_KEY")
+      while true; do
+        aws_secret=$(prompt_password "AWS_SECRET_ACCESS_KEY")
+        [ -n "$aws_secret" ] && break
+        echo "  [WARN] cannot be empty"
+      done
       env_content="${env_content}AWS_SECRET_ACCESS_KEY="
-      env_content="${env_content}$(printf '%s\n' "${aws_secret}")"$'\n'
+      env_content="${env_content}$(printf '%s' "${aws_secret}")"$'\n'
     fi
 
     local bucket

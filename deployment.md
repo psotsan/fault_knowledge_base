@@ -48,8 +48,8 @@ To be able to deploy, you will need the following values ready:
 | `SECURE_HSTS_SECONDS` | HSTS max-age in seconds (default: `31536000`) |
 | `SESSION_COOKIE_AGE` | Session lifetime in seconds (default: `28800`) |
 | `USE_S3` | Whether to serve static files from S3 (`True`/`False`) |
-| `AWS_ACCESS_KEY_ID` | (If `USE_S3=True`) AWS access key |
-| `AWS_SECRET_ACCESS_KEY` | (If `USE_S3=True`) AWS secret key |
+| `AWS_ACCESS_KEY_ID` | (If `USE_S3=True` and **no** IAM Role) AWS access key |
+| `AWS_SECRET_ACCESS_KEY` | (If `USE_S3=True` and **no** IAM Role) AWS secret key |
 | `AWS_STORAGE_BUCKET_NAME` | (If `USE_S3=True`) S3 bucket name |
 | `AWS_S3_REGION_NAME` | (If `USE_S3=True`) S3 region (default: `eu-west-1`) |
 
@@ -67,7 +67,10 @@ This will prompt you for:
 
 1. **Django settings** — `ALLOWED_HOSTS`, `DEBUG`, `CSRF_TRUSTED_ORIGINS`, `SECRET_KEY` (auto-generated)
 2. **Database** — `DB_NAME`, `DB_USER`, `DB_PASSWORD`, `DB_ROOT_PASSWORD`, `DB_HOST`, `DB_PORT`
-3. **AWS S3 (optional)** — `USE_S3`, and if enabled, your S3 credentials
+3. **AWS S3 (optional)** — `USE_S3`, and if enabled:
+   - Asks if you use an **IAM Role** (recommended) — if yes, skips `AWS_ACCESS_KEY_ID` / `AWS_SECRET_ACCESS_KEY`
+   - Otherwise, prompts for access keys
+   - Always prompts for `AWS_STORAGE_BUCKET_NAME` and `AWS_S3_REGION_NAME`
 
 > **Tip:** For production, set `DB_HOST=averias-db` (the name of the MariaDB container, as both containers share a Docker network). The `.averias.env` file is automatically secured with restricted permissions (`chmod 600`).
 

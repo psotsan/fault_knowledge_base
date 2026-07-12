@@ -145,13 +145,21 @@ write_env() {
   env_content+="USE_S3=${use_s3}"$'\n'
 
   if [ "$use_s3" = "True" ]; then
-    local aws_key
-    aws_key=$(prompt_required "AWS_ACCESS_KEY_ID")
-    env_content+="AWS_ACCESS_KEY_ID=${aws_key}"$'\n'
+    local use_iam_role
+    read -r -p "  ¿Usar IAM Role de EC2? [y/N]: " use_iam_role
 
-    local aws_secret
-    aws_secret=$(prompt_password "AWS_SECRET_ACCESS_KEY")
-    env_content+="AWS_SECRET_ACCESS_KEY='${aws_secret}'"$'\n'
+    if [[ "$use_iam_role" =~ ^[yY]([eE][sS])?$ ]]; then
+      # IAM Role — no se necesitan keys, boto3 obtiene credenciales automáticamente
+      echo "  [OK] Usando IAM Role — no se requieren AWS_ACCESS_KEY_ID ni AWS_SECRET_ACCESS_KEY"
+    else
+      local aws_key
+      aws_key=$(prompt_required "AWS_ACCESS_KEY_ID")
+      env_content+="AWS_ACCESS_KEY_ID=${aws_key}"$'\n'
+
+      local aws_secret
+      aws_secret=$(prompt_password "AWS_SECRET_ACCESS_KEY")
+      env_content+="AWS_SECRET_ACCESS_KEY='${aws_secret}'"$'\n'
+    fi
 
     local bucket
     bucket=$(prompt_required "AWS_STORAGE_BUCKET_NAME")

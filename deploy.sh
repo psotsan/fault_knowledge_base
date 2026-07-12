@@ -84,7 +84,9 @@ trap 'handle_error $LINENO' ERR
 # --------------- helpers --------------------
 read_env_value() {
   local key="$1"
-  grep "^${key}=" "$ENV_FILE" | cut -d'=' -f2- | xargs | tr -d "'"
+  # Lee el valor después del '=', elimina posibles comillas simples envolventes
+  # pero conserva el valor literal
+  grep "^${key}=" "$ENV_FILE" | sed "s/^${key}=//" | sed "s/^'//; s/'$//" | tr -d '\n'
 }
 
 # --------------- preflight ---------------

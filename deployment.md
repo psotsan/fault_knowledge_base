@@ -57,7 +57,7 @@ To be able to deploy, you will need the following values ready:
 
 ## 2. Environment Setup
 
-Run the interactive script on the EC2 instance to generate the `.env` file:
+Run the interactive script on the EC2 instance to generate `~/.averias.env`:
 
 ```bash
 ./setup-env.sh
@@ -69,9 +69,9 @@ This will prompt you for:
 2. **Database** — `DB_NAME`, `DB_USER`, `DB_PASSWORD`, `DB_ROOT_PASSWORD`, `DB_HOST`, `DB_PORT`
 3. **AWS S3 (optional)** — `USE_S3`, and if enabled, your S3 credentials
 
-> **Tip:** For production, set `DB_HOST=averias-db` (the name of the MariaDB container, as both containers share a Docker network). The `.env` file is automatically secured with restricted permissions (`chmod 600`).
+> **Tip:** For production, set `DB_HOST=averias-db` (the name of the MariaDB container, as both containers share a Docker network). The `.averias.env` file is automatically secured with restricted permissions (`chmod 600`).
 
-Alternatively, you can create the `.env` file manually with the required variables (see `setup-env.sh` for the expected format).
+Alternatively, you can create `~/.averias.env` manually with the required variables (see `setup-env.sh` for the expected format).
 
 ---
 
@@ -119,7 +119,7 @@ docker push ghcr.io/psotsan/averias:v1.0.0
 
 ### 4.1 Run the deploy script
 
-Make sure the `.env` file is in place (`~/.env`), then run:
+Make sure `~/.averias.env` is in place, then run:
 
 ```bash
 ./deploy.sh
@@ -135,7 +135,7 @@ The script does the following:
    - Database and user created from `.env` variables
 4. **App** — pulls the image from GHCR and starts the web container (`averias`) with:
    - Port mapping: `8001:8001` (host:container)
-   - Environment variables loaded from `~/.env`
+   - Environment variables loaded from `~/.averias.env`
    - Auto-restart policy (`unless-stopped`)
 5. **Wait** — waits for both containers to be ready (MariaDB ping + Django setup)
 6. **Migrations** — runs `python manage.py migrate`

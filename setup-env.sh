@@ -2,13 +2,13 @@
 # =============================================================================
 # setup-env.sh
 #
-# Genera/actualiza interactivamente ~/.env para fault_knowledge_base.
+# Genera/actualiza interactivamente ~/.averias.env para averias.
 # Ejecutar una vez al provisionar la instancia o al cambiar variables.
 # =============================================================================
 set -euo pipefail
 
 # --------------- defaults ---------------
-DEFAULT_ENV_FILE="$HOME/.env"
+DEFAULT_ENV_FILE="$HOME/.averias.env"
 ENV_FILE="$DEFAULT_ENV_FILE"
 
 # --------------- usage ---------------

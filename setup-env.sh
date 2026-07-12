@@ -87,6 +87,9 @@ prompt_password() {
 
 # --------------- write .env ---------------
 write_env() {
+  # Desactivar history expansion para que caracteres como ! no se expandan
+  set +H
+
   local env_content=""
 
   echo ""
@@ -94,47 +97,50 @@ write_env() {
 
   local secret_key
   secret_key=$(generate_secret_key)
-  env_content+="SECRET_KEY='${secret_key}'"$'\n'
+  env_content="${env_content}SECRET_KEY="
+  env_content="${env_content}$(printf '%s\n' "${secret_key}")"$'\n'
 
   local allowed_hosts
   allowed_hosts=$(prompt_required "ALLOWED_HOSTS")
-  env_content+="ALLOWED_HOSTS=${allowed_hosts}"$'\n'
+  env_content="${env_content}ALLOWED_HOSTS=${allowed_hosts}"$'\n'
 
   local debug
   debug=$(prompt_optional "DEBUG" "False")
-  env_content+="DEBUG=${debug}"$'\n'
+  env_content="${env_content}DEBUG=${debug}"$'\n'
 
   local csrf
   csrf=$(prompt_required "CSRF_TRUSTED_ORIGINS")
-  env_content+="CSRF_TRUSTED_ORIGINS=${csrf}"$'\n'
+  env_content="${env_content}CSRF_TRUSTED_ORIGINS=${csrf}"$'\n'
 
   echo ""
   echo "--- Base de datos (MariaDB/MySQL) ---"
 
   local db_name
   db_name=$(prompt_required "DB_NAME")
-  env_content+="DB_NAME=${db_name}"$'\n'
+  env_content="${env_content}DB_NAME=${db_name}"$'\n'
 
   local db_user
   db_user=$(prompt_required "DB_USER")
-  env_content+="DB_USER=${db_user}"$'\n'
+  env_content="${env_content}DB_USER=${db_user}"$'\n'
 
   local db_password
   db_password=$(prompt_password "DB_PASSWORD")
-  env_content+="DB_PASSWORD='${db_password}'"$'\n'
+  env_content="${env_content}DB_PASSWORD="
+  env_content="${env_content}$(printf '%s\n' "${db_password}")"$'\n'
 
   local db_host
   db_host=$(prompt_optional "DB_HOST" "localhost")
-  env_content+="DB_HOST=${db_host}"$'\n'
+  env_content="${env_content}DB_HOST=${db_host}"$'\n'
 
   local db_port
   db_port=$(prompt_optional "DB_PORT" "3306")
-  env_content+="DB_PORT=${db_port}"$'\n'
+  env_content="${env_content}DB_PORT=${db_port}"$'\n'
 
   local db_root_password
   db_root_password=$(prompt_password "DB_ROOT_PASSWORD (dejar vacío para usar DB_PASSWORD)")
   if [ -n "$db_root_password" ]; then
-    env_content+="DB_ROOT_PASSWORD='${db_root_password}'"$'\n'
+    env_content="${env_content}DB_ROOT_PASSWORD="
+    env_content="${env_content}$(printf '%s\n' "${db_root_password}")"$'\n'
   fi
 
   echo ""
@@ -142,32 +148,32 @@ write_env() {
 
   local use_s3
   use_s3=$(prompt_optional "USE_S3" "True")
-  env_content+="USE_S3=${use_s3}"$'\n'
+  env_content="${env_content}USE_S3=${use_s3}"$'\n'
 
   if [ "$use_s3" = "True" ]; then
     local use_iam_role
     read -r -p "  ¿Usar IAM Role de EC2? [y/N]: " use_iam_role
 
     if [[ "$use_iam_role" =~ ^[yY]([eE][sS])?$ ]]; then
-      # IAM Role — no se necesitan keys, boto3 obtiene credenciales automáticamente
       echo "  [OK] Usando IAM Role — no se requieren AWS_ACCESS_KEY_ID ni AWS_SECRET_ACCESS_KEY"
     else
       local aws_key
       aws_key=$(prompt_required "AWS_ACCESS_KEY_ID")
-      env_content+="AWS_ACCESS_KEY_ID=${aws_key}"$'\n'
+      env_content="${env_content}AWS_ACCESS_KEY_ID=${aws_key}"$'\n'
 
       local aws_secret
       aws_secret=$(prompt_password "AWS_SECRET_ACCESS_KEY")
-      env_content+="AWS_SECRET_ACCESS_KEY='${aws_secret}'"$'\n'
+      env_content="${env_content}AWS_SECRET_ACCESS_KEY="
+      env_content="${env_content}$(printf '%s\n' "${aws_secret}")"$'\n'
     fi
 
     local bucket
     bucket=$(prompt_required "AWS_STORAGE_BUCKET_NAME")
-    env_content+="AWS_STORAGE_BUCKET_NAME=${bucket}"$'\n'
+    env_content="${env_content}AWS_STORAGE_BUCKET_NAME=${bucket}"$'\n'
 
     local region
     region=$(prompt_optional "AWS_S3_REGION_NAME" "eu-west-1")
-    env_content+="AWS_S3_REGION_NAME=${region}"$'\n'
+    env_content="${env_content}AWS_S3_REGION_NAME=${region}"$'\n'
   fi
 
   echo ""
@@ -175,24 +181,27 @@ write_env() {
 
   local hsts
   hsts=$(prompt_optional "SECURE_HSTS_SECONDS" "31536000")
-  env_content+="SECURE_HSTS_SECONDS=${hsts}"$'\n'
+  env_content="${env_content}SECURE_HSTS_SECONDS=${hsts}"$'\n'
 
   local ssl_redirect
   ssl_redirect=$(prompt_optional "SECURE_SSL_REDIRECT" "True")
-  env_content+="SECURE_SSL_REDIRECT=${ssl_redirect}"$'\n'
+  env_content="${env_content}SECURE_SSL_REDIRECT=${ssl_redirect}"$'\n'
 
   local session_secure
   session_secure=$(prompt_optional "SESSION_COOKIE_SECURE" "True")
-  env_content+="SESSION_COOKIE_SECURE=${session_secure}"$'\n'
+  env_content="${env_content}SESSION_COOKIE_SECURE=${session_secure}"$'\n'
 
   local csrf_secure
   csrf_secure=$(prompt_optional "CSRF_COOKIE_SECURE" "True")
-  env_content+="CSRF_COOKIE_SECURE=${csrf_secure}"$'\n'
+  env_content="${env_content}CSRF_COOKIE_SECURE=${csrf_secure}"$'\n'
 
   printf "%s" "$env_content" > "$ENV_FILE"
   chmod 600 "$ENV_FILE"
   echo ""
   echo "[OK] .env created at: ${ENV_FILE}"
+
+  # Restaurar history expansion (por si acaso)
+  set -H 2>/dev/null || true
 }
 
 # ------------------ main ------------------

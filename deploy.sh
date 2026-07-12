@@ -84,17 +84,13 @@ trap 'handle_error $LINENO' ERR
 # --------------- helpers --------------------
 read_env_value() {
   local key="$1"
-  # Lee la línea del .env, extrae el valor y elimina comillas simples envolventes
-  # Formato: CLAVE=valor  o  CLAVE='valor'
+  # Lee la línea del .env y extrae el valor después del '='
+  # Formato: CLAVE=valor (sin comillas envolventes)
   local line
   line=$(grep "^${key}=" "$ENV_FILE" | head -1) || true
   [ -z "$line" ] && return 1
-  # Eliminar la parte "CLAVE=" del inicio
-  local val="${line#*=}"
-  # Eliminar comillas simples envolventes si existen
-  val="${val#\'}"
-  val="${val%\'}"
-  printf "%s" "$val"
+  # Eliminar la parte "CLAVE=" del inicio y devolver el valor literal
+  printf "%s" "${line#*=}"
 }
 
 # --------------- preflight ---------------

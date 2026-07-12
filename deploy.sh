@@ -4,6 +4,26 @@
 #
 # Deploy averias (glosario de averías) con Docker.
 # Gestiona dos contenedores: averias-db (MariaDB) y averias (app web).
+#
+# Historial de issues resueltos:
+#
+# 2026-07-12 - S3 static files con region personalizada
+#   Si el bucket S3 está en una region distinta de us-east-1, el backend
+#   S3Boto3Storage genera URLs sin region (ej: s3.amazonaws.com) en vez de
+#   con region (ej: s3.eu-south-2.amazonaws.com), dando 400 Bad Request.
+#   Solucion: definir AWS_S3_CUSTOM_DOMAIN=<bucket>.s3.<region>.amazonaws.com
+#   en el .env para forzar el endpoint correcto.
+#
+# 2026-07-12 - Gunicorn "Permission denied: /nonexistent"
+#   El contenedor corre como usuario nobody, cuyo HOME por defecto es
+#   /nonexistent. Gunicorn necesita escribir en HOME. Solucion: anadir
+#   ENV HOME=/home/nobody en el Dockerfile ademas de crear el directorio.
+#
+# 2026-07-12 - Caracteres especiales en passwords del .env
+#   Si la password contiene !, $, etc., bash los interpreta como history
+#   expansion al hacer env_content+="DB_PASSWORD='${val}'". Solucion: usar
+#   set +H y printf '%s' en vez de interpolacion directa en comillas dobles.
+#
 # =============================================================================
 set -euo pipefail
 

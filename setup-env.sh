@@ -186,6 +186,11 @@ write_env() {
     local region
     region=$(prompt_optional "AWS_S3_REGION_NAME" "eu-west-1")
     env_content="${env_content}AWS_S3_REGION_NAME=${region}"$'\n'
+
+    local custom_domain
+    default_domain="${bucket}.s3.${region}.amazonaws.com"
+    custom_domain=$(prompt_optional "AWS_S3_CUSTOM_DOMAIN" "${default_domain}")
+    env_content="${env_content}AWS_S3_CUSTOM_DOMAIN=${custom_domain}"$'\n'
   fi
 
   echo ""

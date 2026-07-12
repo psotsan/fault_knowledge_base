@@ -1,4 +1,4 @@
 # TODO
 
-- adaptar deploy.sh
-- construir imágnes docker y subirlas a GHCR
+- revisar el logout
+- revisar el estilo de admin

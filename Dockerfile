@@ -18,6 +18,11 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 COPY --chown=nobody:nogroup . .
+
+# Crear directorio HOME para el usuario nobody (gunicorn necesita escribir ahí)
+RUN mkdir -p /home/nobody && chown nobody:nogroup /home/nobody
+ENV HOME=/home/nobody
+
 USER nobody
 
 EXPOSE 8001

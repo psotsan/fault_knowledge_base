@@ -10,9 +10,10 @@
 2. [Environment Setup](#2-environment-setup)
 3. [Docker Image](#3-docker-image)
 4. [Deployment](#4-deployment)
-5. [Post-Deployment](#5-post-deployment)
-6. [Local Development](#6-local-development)
-7. [Project Structure](#7-project-structure)
+5. [Troubleshooting](#5-troubleshooting)
+6. [Post-Deployment](#6-post-deployment)
+7. [Local Development](#7-local-development)
+8. [Project Structure](#8-project-structure)
 
 ---
 
@@ -47,11 +48,14 @@ To be able to deploy, you will need the following values ready:
 | `SECURE_SSL_REDIRECT` | `True` or `False` (default: `True`) |
 | `SECURE_HSTS_SECONDS` | HSTS max-age in seconds (default: `31536000`) |
 | `SESSION_COOKIE_AGE` | Session lifetime in seconds (default: `28800`) |
+| `SESSION_COOKIE_SECURE` | `True` or `False` (default: `True`). Set to `False` for HTTP-only testing. |
+| `CSRF_COOKIE_SECURE` | `True` or `False` (default: `True`). Set to `False` for HTTP-only testing. |
 | `USE_S3` | Whether to serve static files from S3 (`True`/`False`) |
 | `AWS_ACCESS_KEY_ID` | (If `USE_S3=True` and **no** IAM Role) AWS access key |
 | `AWS_SECRET_ACCESS_KEY` | (If `USE_S3=True` and **no** IAM Role) AWS secret key |
 | `AWS_STORAGE_BUCKET_NAME` | (If `USE_S3=True`) S3 bucket name |
 | `AWS_S3_REGION_NAME` | (If `USE_S3=True`) S3 region (default: `eu-west-1`) |
+| `AWS_S3_CUSTOM_DOMAIN` | (If `USE_S3=True`) Custom S3 endpoint (default: `<bucket>.s3.<region>.amazonaws.com`). Required for regions that need explicit endpoint. |
 
 ---
 
@@ -70,7 +74,7 @@ This will prompt you for:
 3. **AWS S3 (optional)** — `USE_S3`, and if enabled:
    - Asks if you use an **IAM Role** (recommended) — if yes, skips `AWS_ACCESS_KEY_ID` / `AWS_SECRET_ACCESS_KEY`
    - Otherwise, prompts for access keys
-   - Always prompts for `AWS_STORAGE_BUCKET_NAME` and `AWS_S3_REGION_NAME`
+   - Always prompts for `AWS_STORAGE_BUCKET_NAME`, `AWS_S3_REGION_NAME`, and `AWS_S3_CUSTOM_DOMAIN`
 
 > **Tip:** For production, set `DB_HOST=averias-db` (the name of the MariaDB container, as both containers share a Docker network). The `.averias.env` file is automatically secured with restricted permissions (`chmod 600`).
 
@@ -171,29 +175,59 @@ The script does the following:
 ./deploy.sh --env-file /path/to/custom/.env
 ```
 
-### 4.3 NGINX configuration
+### 4.3 DNS setup
 
-NGINX should proxy requests to `http://127.0.0.1:8001`. Example location block:
+Create a **DNS A record** pointing to your instance IP:
+
+| Type | Name | Value |
+|---|---|---|
+| **A** | `averias` | `<instance-public-ip>` |
+
+> ⚠️ Use an **A record**, not a CNAME. A CNAME cannot point to an IP address and will cause certbot to fail with `NXDOMAIN`.
+
+### 4.4 NGINX configuration
+
+Create a server block for the subdomain at `/etc/nginx/sites-available/averias`:
 
 ```nginx
 server {
     listen 80;
     server_name averias.example.com;
+    return 301 https://$server_name$request_uri;
+}
+
+server {
+    server_name averias.example.com;
+
+    location /static/ {
+        return 301 https://<your-bucket>.s3.<region>.amazonaws.com/;
+    }
 
     location / {
         include proxy_params;
         proxy_pass http://127.0.0.1:8001;
     }
+
+    listen 443 ssl; # managed by Certbot
+    ssl_certificate /etc/letsencrypt/live/psotorrio.click/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/psotorrio.click/privkey.pem;
+    include /etc/letsencrypt/options-ssl-nginx.conf;
+    ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem;
 }
 ```
 
-If HTTPS/SSL is needed, use Certbot to obtain a certificate:
+Enable it and obtain the SSL certificate:
 
 ```bash
+sudo ln -s /etc/nginx/sites-available/averias /etc/nginx/sites-enabled/
+sudo nginx -t
+sudo systemctl reload nginx
 sudo certbot --nginx -d averias.example.com
 ```
 
-### 4.4 Docker Compose (local/development)
+> Certbot will add the new domain to your existing certificate automatically if it shares the same root domain.
+
+### 4.5 Docker Compose (local/development)
 
 For local development, use `docker-compose.yml`:
 
@@ -205,9 +239,61 @@ This starts both a MariaDB container (`db`) and the web application (`web`) with
 
 ---
 
-## 5. Post-Deployment
+## 5. Troubleshooting
 
-### 5.1 Load test data (optional)
+### 5.1 MariaDB container fails with "password option is not specified"
+
+**Cause:** The `.env` file contains special characters (`!`, `$`, etc.) that bash interpreted during generation.
+
+**Solution:** Regenerate the `.env` file (the script now handles special characters safely).
+
+```bash
+rm ~/.averias.env
+./setup-env.sh
+```
+
+### 5.2 App returns 400 Bad Request
+
+**Cause:** `SECURE_SSL_REDIRECT=True` and `SESSION_COOKIE_SECURE=True` but the request is HTTP.
+
+**Solutions:**
+- Use HTTPS via the configured subdomain
+- Or for testing, set these to `False` in `~/.averias.env` and restart:
+  ```
+  SECURE_SSL_REDIRECT=False
+  SESSION_COOKIE_SECURE=False
+  CSRF_COOKIE_SECURE=False
+  ```
+
+### 5.3 App returns 500 Internal Server Error
+
+Check Gunicorn/Django logs:
+
+```bash
+docker logs averias --tail 40
+```
+
+Common causes:
+- Pending migrations: `docker exec averias python manage.py migrate`
+- Database connection issues: verify `DB_HOST` is `averias-db`
+- Missing environment variables: verify `~/.averias.env` has all required values
+
+### 5.4 Gunicorn fails with "Permission denied: '/nonexistent'"
+
+**Cause:** The container runs as `nobody` user but `$HOME` is not set.
+
+**Solution:** The Dockerfile now sets `ENV HOME=/home/nobody`. Rebuild and push the image:
+
+```bash
+docker build -t ghcr.io/psotsan/averias:latest .
+docker push ghcr.io/psotsan/averias:latest
+```
+
+---
+
+## 6. Post-Deployment
+
+### 6.1 Load test data (optional)
 
 If you want to seed the database with sample equipment types, models, and faults:
 
@@ -220,7 +306,7 @@ This creates:
 - **6 models**
 - **48 faults** with random reference codes
 
-### 5.2 Verify the app is running
+### 6.2 Verify the app is running
 
 ```bash
 # Smoke test (already run by deploy.sh)
@@ -233,7 +319,7 @@ docker logs averias
 docker ps --filter network=averias-net
 ```
 
-### 5.3 Create a Django superuser (manual)
+### 6.3 Create a Django superuser (manual)
 
 If the automated step failed or you need additional users:
 
@@ -241,7 +327,7 @@ If the automated step failed or you need additional users:
 docker exec -it averias python manage.py createsuperuser
 ```
 
-### 5.4 Database backup and restore
+### 6.4 Database backup and restore
 
 ```bash
 # Backup
@@ -251,7 +337,7 @@ docker exec averias-db mariadb-dump -u root -p"$DB_PASSWORD" "$DB_NAME" > backup
 docker exec -i averias-db mariadb -u root -p"$DB_PASSWORD" "$DB_NAME" < backup.sql
 ```
 
-### 5.5 Useful commands
+### 6.5 Useful commands
 
 ```bash
 # View app logs
@@ -281,9 +367,9 @@ docker volume rm averias-db-data
 
 ---
 
-## 6. Local Development
+## 7. Local Development
 
-### 6.1 Quick start
+### 7.1 Quick start
 
 ```bash
 # Clone the repository
@@ -300,7 +386,7 @@ python manage.py migrate
 python manage.py runserver 0.0.0.0:8001
 ```
 
-### 6.2 Environment variables for development
+### 7.2 Environment variables for development
 
 Create a `.env` file at the project root:
 
@@ -317,7 +403,7 @@ DB_PORT=3306
 USE_S3=False
 ```
 
-### 6.3 Useful commands
+### 7.3 Useful commands
 
 ```bash
 # Run migrations
@@ -338,7 +424,7 @@ docker compose exec web python cargar_datos.py
 
 ---
 
-## 7. Project Structure
+## 8. Project Structure
 
 ```
 fault_knowledge_base/

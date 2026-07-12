@@ -77,7 +77,7 @@ prompt_password() {
   local var="$1"
   local val
   read -r -s -p "  ${var}: " val
-  echo ""
+  echo "" >&2      # ← stderr, no stdout
   printf "%s" "$val"
 }
 
@@ -85,7 +85,7 @@ prompt_password_optional() {
   local var="$1"
   local val
   read -r -s -p "  ${var}: " val
-  echo ""
+  echo "" >&2      # ← idem
   printf "%s" "$val"
 }
 

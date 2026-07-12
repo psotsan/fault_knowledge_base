@@ -1,5 +1,7 @@
-from django.shortcuts import redirect
+from django.shortcuts import redirect, render
 from django.views.generic.edit import FormView
+from django.contrib.auth.views import PasswordChangeView
+from django.urls import reverse_lazy
 from django.http import Http404, HttpResponse
 from .forms import FormTipoEquipo
 from main.constantes import FUNCIONALIDAD, FUNCION_AVERIAS
@@ -8,6 +10,15 @@ from main.constantes import FUNCIONALIDAD, FUNCION_AVERIAS
 def index(request):
     request.session.set_expiry(28800)
     return redirect('/accounts/login/')
+
+
+class MiPasswordChangeView(PasswordChangeView):
+    template_name = "main/cambiar_password.html"
+    success_url = reverse_lazy("password_change_done")
+
+
+def password_change_done(request):
+    return render(request, "main/cambiar_password_hecho.html")
 
 
 class TipoEquipo(FormView):

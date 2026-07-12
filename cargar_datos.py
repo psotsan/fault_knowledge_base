@@ -13,7 +13,7 @@ import random
 
 import django
 
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'palex_averias.settings')
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'averias.settings')
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 django.setup()

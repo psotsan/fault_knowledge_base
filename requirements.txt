@@ -2,6 +2,7 @@ asgiref==3.11.1
 crispy-bootstrap5==2026.3
 Django==6.0.7
 django-crispy-forms==2.5
+django-storages[boto3]==1.14.5
 gunicorn>=23.0
 mysqlclient==2.2.8
 python-decouple==3.8

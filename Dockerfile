@@ -17,8 +17,9 @@ RUN mkdir -p /app/static/htmx && \
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY . .
+COPY --chown=nobody:nogroup . .
+USER nobody
 
 EXPOSE 8001
-CMD ["gunicorn", "--bind", "0.0.0.0:8001", "palex_averias.wsgi:application"]
+CMD ["gunicorn", "--bind", "0.0.0.0:8001", "averias.wsgi:application"]
 

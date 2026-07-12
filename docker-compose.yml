@@ -2,7 +2,7 @@ services:
   db:
     image: mariadb:11.4
     environment:
-      MARIADB_ROOT_PASSWORD: ${DB_PASSWORD}
+      MARIADB_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-${DB_PASSWORD}}
       MARIADB_DATABASE: ${DB_NAME}
       MARIADB_USER: ${DB_USER}
       MARIADB_PASSWORD: ${DB_PASSWORD}
@@ -27,19 +27,21 @@ services:
       SECRET_KEY: ${SECRET_KEY}
       DEBUG: ${DEBUG}
       CSRF_TRUSTED_ORIGINS: ${CSRF_TRUSTED_ORIGINS}
+      USE_S3: ${USE_S3}
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
+      AWS_STORAGE_BUCKET_NAME: ${AWS_STORAGE_BUCKET_NAME}
+      AWS_S3_REGION_NAME: ${AWS_S3_REGION_NAME}
     ports:
       - "8001:8001"
     depends_on:
       db:
         condition: service_healthy
     volumes:
-      - static_data:/app/staticfiles
       - .:/app
     command: >
       sh -c "python manage.py migrate &&
-             python manage.py collectstatic --noinput &&
-             gunicorn --bind 0.0.0.0:8001 palex_averias.wsgi:application"
+             gunicorn --bind 0.0.0.0:8001 averias.wsgi:application"
 
 volumes:
   mariadb_data:
-  static_data:

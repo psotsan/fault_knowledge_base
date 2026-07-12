@@ -84,9 +84,17 @@ trap 'handle_error $LINENO' ERR
 # --------------- helpers --------------------
 read_env_value() {
   local key="$1"
-  # Lee el valor después del '=', elimina posibles comillas simples envolventes
-  # pero conserva el valor literal
-  grep "^${key}=" "$ENV_FILE" | sed "s/^${key}=//" | sed "s/^'//; s/'$//" | tr -d '\n'
+  # Lee la línea del .env, extrae el valor y elimina comillas simples envolventes
+  # Formato: CLAVE=valor  o  CLAVE='valor'
+  local line
+  line=$(grep "^${key}=" "$ENV_FILE" | head -1) || true
+  [ -z "$line" ] && return 1
+  # Eliminar la parte "CLAVE=" del inicio
+  local val="${line#*=}"
+  # Eliminar comillas simples envolventes si existen
+  val="${val#\'}"
+  val="${val%\'}"
+  printf "%s" "$val"
 }
 
 # --------------- preflight ---------------
@@ -159,6 +167,9 @@ deploy_database() {
   db_password=$(read_env_value "DB_PASSWORD")
   db_root_password=$(read_env_value "DB_ROOT_PASSWORD" || true)
   [ -z "$db_root_password" ] && db_root_password="$db_password"
+
+  echo "[..] DB_NAME='${db_name}', DB_USER='${db_user}'"
+  echo "[..] DB_PASSWORD=***hidden***, DB_ROOT_PASSWORD=***hidden***"
 
   echo "[..] Stopping existing DB container '${DB_CONTAINER_NAME}'..."
   docker stop "$DB_CONTAINER_NAME" 2>/dev/null || true

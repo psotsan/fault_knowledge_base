@@ -14,7 +14,7 @@ def index(request):
 
 class MiPasswordChangeView(PasswordChangeView):
     template_name = "main/cambiar_password.html"
-    success_url = reverse_lazy("password_change_done")
+    success_url = reverse_lazy("cambiar-password-hecho")
 
 
 def password_change_done(request):

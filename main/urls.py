@@ -12,5 +12,5 @@ urlpatterns = [
          name="cambiar-password"),
     path('cambiar-password/hecho/',
          views.password_change_done,
-         name="password_change_done"),
+         name="cambiar-password-hecho"),
 ]

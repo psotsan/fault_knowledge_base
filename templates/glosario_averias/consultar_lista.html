@@ -78,10 +78,7 @@
                     {% if visualizar %}
                         <a href="{% url 'detalle-averia' tipo_equipo=tipo_equipo pk=av.pk %}" class="btn btn-secondary">Ver detalle</a>
                     {% else %}
-                        <form method="post" action="{% url 'editar-averia' tipo_equipo=tipo_equipo pk=av.pk %}">
-                            {% csrf_token %}
-                            <button type="submit" class="btn btn-secondary">Editar</button>
-                        </form>
+                        <a href="{% url 'editar-averia' tipo_equipo=tipo_equipo pk=av.pk %}" class="btn btn-secondary">Editar</a>
                     {% endif %}
                 </td>
             </tr>

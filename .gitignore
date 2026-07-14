@@ -25,4 +25,8 @@ pythonProject/
 .DS_Store
 Thumbs.db
 
-
+averias/settings_local.py
+.db_loaded
+.env.local
+.venv_local/
+run_local.sh

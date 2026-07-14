@@ -13,13 +13,22 @@ import random
 
 import django
 
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'averias.settings')
+# Si no se ha definido DJANGO_SETTINGS_MODULE, intentar con settings_local
+# (desarrollo con SQLite) o con settings (producción con MySQL).
+if 'DJANGO_SETTINGS_MODULE' not in os.environ:
+    # Comprobar si existe settings_local.py -> desarrollo local
+    base_dir = os.path.dirname(os.path.abspath(__file__))
+    if os.path.isfile(os.path.join(base_dir, 'averias', 'settings_local.py')):
+        os.environ['DJANGO_SETTINGS_MODULE'] = 'averias.settings_local'
+    else:
+        os.environ['DJANGO_SETTINGS_MODULE'] = 'averias.settings'
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 django.setup()
 
 from main.models import MasterEquipos, MasterModelos
 from glosario_averias.models import Averia
+from django.contrib.auth.models import User
 
 # ──────────────────────────────────────────────
 # Referencias inventadas
@@ -156,6 +165,13 @@ TIPOS_EQUIPO = [
 
 def main():
     random.seed(42)  # Semilla fija para que las referencias sean reproducibles
+
+    # ── Crear superusuario por defecto ─────────────────────────
+    if not User.objects.filter(username='admin').exists():
+        User.objects.create_superuser('admin', '', 'test1test1')
+        print('Superusuario creado: admin / test1test1')
+    else:
+        print('Superusuario ya existe: admin')
 
     print('Limpiando datos existentes...')
     Averia.objects.all().delete()

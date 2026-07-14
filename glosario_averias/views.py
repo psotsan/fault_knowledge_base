@@ -5,6 +5,8 @@ from django.urls import reverse_lazy
 from django.contrib import messages
 from django.db.models import Q
 
+from main.funciones import get_modelos_por_tipo
+
 from .forms import get_form_registrar_averia, get_form_filtro
 from .models import Averia
 from main.models import MasterEquipos, MasterModelos
@@ -115,6 +117,12 @@ class EditarAveria(UpdateView):
         self.model = Averia
         self.form_class = get_form_registrar_averia(tipo_equipo)
         return super().dispatch(request, *args, **kwargs)
+
+    def get_form(self, form_class=None):
+        """Pasa la instancia existente y filtra el queryset de modelos por tipo de equipo."""
+        form = super().get_form(form_class)
+        form.fields['modelo'].queryset = get_modelos_por_tipo(self.tipo_equipo)
+        return form
 
     def get_success_url(self):
         return reverse_lazy('listar-averias', kwargs={

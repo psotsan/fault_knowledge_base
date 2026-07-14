@@ -1,7 +1,7 @@
 {% extends "../main/base.html" %}
 
-{% block title %}Nueva avería{% endblock %}
-{% block h1 %}Nueva avería{% endblock %}
+{% block title %}{% if object %}Editar avería{% else %}Nueva avería{% endif %}{% endblock %}
+{% block h1 %}{% if object %}Editar avería{% else %}Nueva avería{% endif %}{% endblock %}
 
 {% block content %}
     {% if messages %}
@@ -45,8 +45,9 @@
                 </label>
             </div>
         </div>
-        <div class="row justify-content-center mt-3 mb-3">
+        <div class="row justify-content-center mt-3 mb-3 gap-2">
             <button name="guardar" type="submit" class="btn btn-secondary col-9 col-sm-6 col-md-2 col-lg-1">Guardar</button>
+            <button type="button" onclick="history.back()" class="btn btn-danger col-9 col-sm-6 col-md-2 col-lg-1">Cancelar</button>
         </div>
     </form>
 {% endblock %}
